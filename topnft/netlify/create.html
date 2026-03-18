@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Studio — Throne Of Power</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+    /* ============================================================
+       ALL STYLES — fully self-contained.
+       No style.css or create-style.css needed for this page.
+       ============================================================ */
+    :root {
+        --dark-bg:#100f15; --primary-gold:#d4af37; --light-text:#f0f0f0;
+        --secondary-text:#a0a0a0; --card-bg:#1a1a22; --card-bg-2:#1f1e2a;
+        --border-color:rgba(212,175,55,0.2); --border-active:rgba(212,175,55,0.6);
+        --success:#2ecc71; --error:#e74c3c;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Poppins',sans-serif;background:var(--dark-bg);color:var(--light-text);cursor:none;overflow-x:hidden;}
+
+    /* Cursor */
+    #cursor{position:fixed;width:20px;height:20px;border:2px solid var(--primary-gold);border-radius:50%;left:0;top:0;pointer-events:none;transform:translate(-50%,-50%);transition:width .2s,height .2s;z-index:9999;}
+    body:hover #cursor{width:40px;height:40px;}
+
+    /* Wallet banner */
+    .wallet-banner{position:fixed;top:0;left:0;width:100%;padding:.8rem 2rem;text-align:center;font-size:.9rem;font-weight:600;z-index:2000;}
+    .wallet-banner.success{background:var(--success);color:#fff;}
+    .wallet-banner.error{background:var(--error);color:#fff;}
+    .wallet-banner.hidden{display:none;}
+
+    /* Utilities */
+    .container{max-width:1200px;margin:0 auto;padding:0 2rem;}
+    .hidden{display:none !important;}
+    .gold-val{color:var(--primary-gold);font-weight:700;}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:600;font-family:'Poppins',sans-serif;transition:transform .2s,background .2s;border:none;cursor:pointer;font-size:.92rem;}
+    .btn-primary{background:var(--primary-gold);color:var(--dark-bg);}
+    .btn-primary:hover{transform:translateY(-2px);background:#e7c356;}
+    .btn-secondary{background:transparent;color:var(--primary-gold);border:2px solid var(--primary-gold);}
+    .btn-secondary:hover{background:var(--primary-gold);color:var(--dark-bg);}
+    .btn-secondary.connected{border-color:var(--success);color:var(--success);}
+    .btn-secondary.connected:hover{background:var(--error);border-color:var(--error);color:#fff;}
+    .btn-ghost{background:transparent;border:1px solid var(--border-active);color:var(--primary-gold);border-radius:8px;padding:.5rem 1.25rem;font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+    .btn-ghost:hover{background:rgba(212,175,55,.1);}
+    .btn-ghost.full-width{width:100%;justify-content:center;display:flex;margin-top:.5rem;}
+    .btn-ghost.small{padding:.3rem .75rem;font-size:.75rem;}
+    .btn-deploy{width:100%;padding:1rem;background:linear-gradient(135deg,var(--primary-gold),#b8960a);color:var(--dark-bg);border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;display:flex;align-items:center;justify-content:center;gap:.75rem;margin-top:1.5rem;}
+    .btn-deploy:hover{opacity:.9;transform:translateY(-2px);}
+    .deploy-spinner{width:18px;height:18px;border:2px solid rgba(16,15,21,.3);border-top-color:var(--dark-bg);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+    .spinner{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+    .spinner.hidden,.deploy-spinner.hidden{display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Navbar */
+    .navbar{position:fixed;width:100%;top:0;padding:1.25rem 0;background:rgba(16,15,21,.88);backdrop-filter:blur(12px);z-index:1000;border-bottom:1px solid var(--border-color);}
+    .navbar .container{display:flex;justify-content:space-between;align-items:center;}
+    .logo{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--light-text);text-decoration:none;}
+    .nav-links{display:flex;align-items:center;list-style:none;gap:1.75rem;}
+    .nav-links a{color:var(--light-text);text-decoration:none;font-weight:400;font-size:.92rem;transition:color .2s;}
+    .nav-links a:not(.btn):hover,.nav-active{color:var(--primary-gold) !important;font-weight:600;}
+
+    /* Create hero */
+    .create-hero{min-height:32vh;display:flex;align-items:flex-end;padding-bottom:3rem;padding-top:100px;position:relative;overflow:hidden;}
+    .create-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(212,175,55,.08) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(212,175,55,.03) 39px,rgba(212,175,55,.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(212,175,55,.03) 39px,rgba(212,175,55,.03) 40px);z-index:0;}
+    .create-hero-content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 2rem;width:100%;}
+    .studio-badge{display:inline-block;background:rgba(212,175,55,.1);border:1px solid var(--border-active);color:var(--primary-gold);font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;padding:.35rem 1rem;border-radius:50px;margin-bottom:1rem;}
+    .create-hero h1{font-family:'Cinzel',serif;font-size:3rem;color:var(--light-text);margin-bottom:.75rem;}
+    .create-hero p{font-size:1rem;color:var(--secondary-text);max-width:600px;}
+
+    /* Studio main */
+    .studio-main{padding:0 0 6rem;min-height:60vh;}
+
+    /* Studio tabs */
+    .studio-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:3rem;padding-top:2rem;}
+    .studio-tab{background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:1.25rem 1.5rem;cursor:pointer;text-align:left;transition:border-color .25s,background .25s,transform .2s;display:flex;flex-direction:column;gap:.2rem;font-family:'Poppins',sans-serif;color:var(--secondary-text);position:relative;overflow:hidden;}
+    .studio-tab::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,.06) 0%,transparent 60%);opacity:0;transition:opacity .3s;}
+    .studio-tab:hover::before,.studio-tab.active::before{opacity:1;}
+    .studio-tab:hover{border-color:var(--border-active);transform:translateY(-2px);}
+    .studio-tab.active{border-color:var(--primary-gold);background:rgba(212,175,55,.06);color:var(--light-text);}
+    .tab-icon{font-size:1.5rem;display:block;margin-bottom:.25rem;}
+    .tab-label{font-size:.95rem;font-weight:600;color:var(--light-text);}
+    .tab-desc{font-size:.75rem;color:var(--secondary-text);}
+
+    /* Tab panels */
+    .tab-panel{display:none;animation:panelFadeIn .35s ease-out;}
+    .tab-panel.active{display:block;}
+    @keyframes panelFadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+    /* Panel layout */
+    .panel-layout{display:grid;grid-template-columns:1fr 360px;gap:3rem;align-items:start;}
+    .panel-header{margin-bottom:2rem;}
+    .panel-header h2{font-family:'Cinzel',serif;font-size:2rem;color:var(--primary-gold);margin-bottom:.5rem;}
+    .panel-header p{color:var(--secondary-text);}
+
+    /* Forms */
+    .form-group{margin-bottom:1.5rem;position:relative;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+    .form-label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--secondary-text);margin-bottom:.5rem;}
+    .req{color:var(--primary-gold);}
+    .form-input{width:100%;background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:8px;padding:.75rem 1rem;color:var(--light-text);font-family:'Poppins',sans-serif;font-size:.92rem;transition:border-color .2s,box-shadow .2s;outline:none;}
+    .form-input:focus{border-color:var(--primary-gold);box-shadow:0 0 0 3px rgba(212,175,55,.12);}
+    .form-textarea{resize:vertical;min-height:100px;}
+    .form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;}
+    .form-range{width:100%;appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,var(--primary-gold) 33%,var(--border-color) 33%);outline:none;cursor:pointer;}
+    .form-range::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--primary-gold);cursor:pointer;box-shadow:0 0 0 3px rgba(212,175,55,.2);}
+    .char-count{position:absolute;right:0;bottom:-1.2rem;font-size:.7rem;color:var(--secondary-text);}
+    .range-display{font-size:.8rem;color:var(--secondary-text);margin-top:.4rem;display:block;}
+    .input-with-icon{position:relative;}
+    .input-with-icon .input-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--primary-gold);font-weight:700;pointer-events:none;}
+    .input-with-icon .form-input{padding-left:2.25rem;}
+
+    /* Toggle switch */
+    .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--border-color);}
+    .toggle-row:last-of-type{border-bottom:none;}
+    .toggle-label{display:block;font-size:.88rem;font-weight:600;}
+    .toggle-hint{display:block;font-size:.75rem;color:var(--secondary-text);margin-top:.15rem;}
+    .toggle-switch{position:relative;display:inline-block;width:46px;height:24px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.12);border-radius:50px;transition:.3s;}
+    .toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+    .toggle-switch input:checked+.toggle-slider{background:var(--primary-gold);}
+    .toggle-switch input:checked+.toggle-slider::before{transform:translateX(22px);}
+
+    /* Upload zone */
+    .upload-zone{border:2px dashed var(--border-color);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--card-bg-2);}
+    .upload-zone:hover,.upload-zone.dragging{border-color:var(--primary-gold);background:rgba(212,175,55,.04);}
+    .upload-zone-inner{}
+    .upload-icon{font-size:2.5rem;display:block;margin-bottom:.75rem;}
+    .upload-title{font-size:.92rem;font-weight:600;margin-bottom:.25rem;}
+    .upload-hint{font-size:.78rem;color:var(--secondary-text);}
+    .upload-preview-img{width:100%;height:160px;object-fit:cover;border-radius:8px;}
+    .upload-progress-wrap{margin-top:.6rem;}
+    .upload-progress-track{height:4px;background:var(--border-color);border-radius:2px;overflow:hidden;}
+    .upload-progress-fill{height:100%;width:0%;background:var(--primary-gold);transition:width .3s;}
+    .upload-progress-text{font-size:.75rem;color:var(--secondary-text);margin-top:.3rem;min-height:1.1rem;}
+
+    /* Preview card (right column) */
+    .panel-preview-col{}
+    .preview-sticky{position:sticky;top:100px;}
+    .preview-title{font-family:'Cinzel',serif;font-size:1rem;color:var(--primary-gold);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+    .preview-card{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:15px;overflow:hidden;margin-bottom:1.5rem;}
+    .preview-card-img{height:200px;display:flex;align-items:center;justify-content:center;background:rgba(212,175,55,.05);overflow:hidden;}
+    .preview-card-img img{width:100%;height:100%;object-fit:cover;}
+    .preview-placeholder-icon{font-size:3.5rem;}
+    .preview-card-body{padding:1.25rem;}
+    .preview-badge{display:inline-block;background:rgba(212,175,55,.12);border:1px solid var(--border-color);color:var(--primary-gold);font-size:.65rem;font-weight:700;letter-spacing:.1em;padding:.2rem .65rem;border-radius:4px;margin-bottom:.75rem;}
+    .preview-card-body h3{font-size:1.1rem;margin-bottom:.25rem;}
+    .preview-symbol{font-size:.82rem;color:var(--secondary-text);margin-bottom:.5rem;}
+    .preview-desc{font-size:.8rem;color:var(--secondary-text);line-height:1.5;margin-bottom:1rem;}
+    .preview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
+    .preview-stat{background:rgba(255,255,255,.03);border:1px solid var(--border-color);border-radius:8px;padding:.5rem;text-align:center;}
+    .stat-label{display:block;font-size:.62rem;color:var(--secondary-text);margin-bottom:.15rem;}
+    .stat-val{display:block;font-size:.85rem;font-weight:600;color:var(--light-text);}
+
+    /* Checklist */
+    .checklist{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:12px;padding:1.25rem;}
+    .checklist h4{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text);margin-bottom:1rem;}
+    .check-item{display:flex;align-items:center;gap:.65rem;font-size:.85rem;color:var(--secondary-text);padding:.3rem 0;}
+    .check-dot{width:8px;height:8px;border-radius:50%;background:var(--border-color);flex-shrink:0;transition:background .2s;}
+    .check-item.done{color:var(--light-text);}
+    .check-item.done .check-dot{background:var(--success);}
+
+    /* ── PHASE CONFIG SECTION ── */
+    .phases-section-title{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--primary-gold);margin:2rem 0 .4rem;}
+    .phases-section-sub{font-size:.82rem;color:var(--secondary-text);margin-bottom:1.25rem;}
+    .phase-card{background:rgba(255,255,255,.02);border:1px solid var(--border-color);border-radius:12px;margin-bottom:.85rem;overflow:hidden;transition:border-color .2s;}
+    .phase-card.phase-always-on{border-color:rgba(212,175,55,.35);}
+    .phase-card:has(input[type=checkbox]:checked){border-color:rgba(212,175,55,.45);}
+    .phase-card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;}
+    .phase-card-left{display:flex;align-items:center;gap:.75rem;}
+    .phase-icon{font-size:1.25rem;}
+    .phase-name{display:block;font-weight:600;font-size:.92rem;}
+    .phase-sub{display:block;font-size:.73rem;color:var(--secondary-text);margin-top:.1rem;}
+    .phase-always-label{font-size:.73rem;color:var(--primary-gold);font-weight:600;}
+    .phase-body{padding:0 1.25rem 1.25rem;border-top:1px solid var(--border-color);}
+    .phase-body.hidden{display:none;}
+    .phase-always-body{padding:0 1.25rem 1.25rem;}
+    .wallet-count-badge{display:inline-block;margin-top:.35rem;background:rgba(212,175,55,.1);border:1px solid var(--border-color);border-radius:50px;padding:.15rem .65rem;font-size:.7rem;color:var(--primary-gold);}
+
+    /* ── DEPLOY SUCCESS CARD ── */
+    .deploy-success-card{background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.35);border-radius:14px;padding:1.75rem;margin-top:1.5rem;}
+    .deploy-success-card .success-icon-big{font-size:2.5rem;margin-bottom:.75rem;display:block;}
+    .deploy-success-card h3{font-family:'Cinzel',serif;font-size:1.25rem;color:var(--primary-gold);margin-bottom:.35rem;}
+    .network-pill{display:inline-block;background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3);color:var(--success);border-radius:50px;padding:.2rem .75rem;font-size:.72rem;font-weight:600;margin-bottom:1.25rem;}
+    .address-block{margin-bottom:1rem;}
+    .address-block .address-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--secondary-text);margin-bottom:.35rem;display:block;}
+    .address-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+    .address-row code{flex:1;font-size:.76rem;background:rgba(0,0,0,.3);padding:.3rem .65rem;border-radius:6px;font-family:monospace;word-break:break-all;color:var(--primary-gold);}
+    .mint-url-box{background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25);border-radius:10px;padding:.85rem 1rem;margin-top:.5rem;}
+    .mint-url-label{font-size:.72rem;color:var(--secondary-text);margin-bottom:.3rem;display:block;}
+    .mint-url-val{font-size:.82rem;word-break:break-all;color:var(--primary-gold);font-weight:600;}
+    .mint-url-actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap;}
+    .deploy-success-actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;}
+    .btn-explorer{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;background:var(--primary-gold);color:var(--dark-bg);border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;transition:background .2s;}
+    .btn-explorer:hover{background:#e7c356;}
+
+    /* Generate tab */
+    .gen-layout{display:grid;grid-template-columns:1fr 320px;gap:3rem;}
+    .layers-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;}
+    .layers-header h3,.section-sub-title{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--primary-gold);margin-bottom:.5rem;}
+    .layers-hint{font-size:.8rem;color:var(--secondary-text);margin-bottom:1.25rem;}
+    .layer-card{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:12px;padding:1rem 1.25rem;margin-bottom:.85rem;}
+    .layer-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+    .drag-handle{color:var(--secondary-text);cursor:grab;font-size:1.1rem;}
+    .layer-name-input{background:transparent;border:none;border-bottom:1px solid var(--border-color);color:var(--light-text);font-family:'Poppins',sans-serif;font-size:.92rem;font-weight:600;outline:none;padding:.2rem 0;flex:1;}
+    .layer-delete{background:transparent;border:none;cursor:pointer;color:var(--secondary-text);font-size:1.1rem;margin-left:auto;transition:color .2s;}
+    .layer-delete:hover{color:var(--error);}
+    .layer-traits{display:flex;flex-wrap:wrap;gap:.5rem;}
+    .trait-chip{background:rgba(212,175,55,.08);border:1px solid var(--border-color);border-radius:6px;padding:.25rem .65rem;font-size:.75rem;display:flex;align-items:center;gap:.35rem;}
+    .trait-chip-rarity{color:var(--primary-gold);font-weight:700;}
+    .add-trait-btn{border:1px dashed var(--border-color);border-radius:6px;padding:.25rem .65rem;font-size:.75rem;cursor:pointer;color:var(--secondary-text);background:none;display:flex;align-items:center;gap:.25rem;transition:border-color .2s,color .2s;}
+    .add-trait-btn:hover{border-color:var(--primary-gold);color:var(--primary-gold);}
+    .gen-settings{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:12px;padding:1.25rem;margin:1.5rem 0;}
+    .gen-settings h3{font-family:'Cinzel',serif;font-size:1rem;color:var(--primary-gold);margin-bottom:1.25rem;}
+    .radio-group{display:flex;gap:1rem;flex-wrap:wrap;}
+    .radio-item{display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer;}
+    .radio-item input{accent-color:var(--primary-gold);}
+    .gen-preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+    .gen-preview-header h3{font-family:'Cinzel',serif;font-size:1rem;color:var(--primary-gold);}
+    .gen-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem;}
+    .gen-preview-tile{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:border-color .2s;}
+    .gen-preview-tile:hover{border-color:var(--primary-gold);}
+    .tile-label{font-size:.7rem;color:var(--secondary-text);margin-top:.4rem;}
+    .rarity-legend h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text);margin-bottom:.75rem;}
+    .rarity-bar-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;}
+    .rarity-bar-label{font-size:.78rem;width:80px;color:var(--light-text);}
+    .rarity-bar-track{flex:1;height:8px;background:var(--border-color);border-radius:4px;overflow:hidden;}
+    .rarity-bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+    .rarity-bar-pct{font-size:.72rem;color:var(--secondary-text);width:32px;text-align:right;}
+
+    /* Pack mint tab */
+    .pack-mint-layout{display:grid;grid-template-columns:1fr 320px;gap:3rem;}
+    .reveal-toggle-group{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.25rem;}
+    .reveal-option{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:10px;padding:1rem;cursor:pointer;text-align:center;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:.3rem;font-family:'Poppins',sans-serif;color:var(--light-text);}
+    .reveal-option:hover,.reveal-option.active{border-color:var(--primary-gold);background:rgba(212,175,55,.06);}
+    .reveal-icon{font-size:1.5rem;}
+    .reveal-option span:nth-child(2){font-size:.85rem;font-weight:600;}
+    .reveal-option small{font-size:.72rem;color:var(--secondary-text);}
+    .pack-tier-card{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:12px;padding:1.25rem;margin-bottom:.85rem;position:relative;overflow:hidden;transition:border-color .2s;}
+    .pack-tier-card::before{content:'';position:absolute;inset:0 auto 0 0;width:4px;background:var(--tier-color,var(--primary-gold));}
+    .pack-tier-card:hover{border-color:var(--border-active);}
+    .tier-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+    .tier-badge{font-size:.82rem;font-weight:700;color:var(--light-text);}
+    .tier-delete-btn{background:transparent;border:none;cursor:pointer;font-size:1.1rem;opacity:.5;transition:opacity .2s;}
+    .tier-delete-btn:hover{opacity:1;}
+    .tier-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;}
+    .tier-field-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--secondary-text);display:block;margin-bottom:.25rem;}
+    .tier-input{width:100%;background:var(--card-bg);border:1px solid var(--border-color);border-radius:6px;padding:.45rem .65rem;color:var(--light-text);font-family:'Poppins',sans-serif;font-size:.82rem;outline:none;}
+    .tier-input:focus{border-color:var(--primary-gold);}
+    .pack-visual-grid{display:flex;flex-direction:column;gap:.65rem;}
+    .pack-visual-card{display:flex;align-items:center;gap:.85rem;background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:10px;padding:.85rem;}
+    .pack-visual-icon{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
+    .pack-visual-info h4{font-size:.88rem;font-weight:700;margin-bottom:.15rem;}
+    .pack-visual-info p{font-size:.72rem;color:var(--secondary-text);}
+    .pack-visual-price{font-size:1rem;font-weight:700;margin-left:auto;}
+    .pack-summary-box{background:var(--card-bg-2);border:1px solid var(--border-color);border-radius:12px;padding:1.25rem;margin-top:1.25rem;}
+    .pack-summary-box h4{font-family:'Cinzel',serif;font-size:.9rem;color:var(--primary-gold);margin-bottom:1rem;}
+    .summary-row{display:flex;justify-content:space-between;font-size:.82rem;padding:.4rem 0;border-bottom:1px solid var(--border-color);color:var(--secondary-text);}
+    .summary-row:last-child{border-bottom:none;}
+    .summary-row span:last-child{color:var(--light-text);font-weight:600;}
+    .summary-row.summary-total span{color:var(--primary-gold);font-weight:700;font-size:.9rem;}
+    .summary-placeholder{color:var(--secondary-text);font-size:.85rem;text-align:center;padding:1rem 0;}
+
+    /* Wizard */
+    .wizard-progress{margin-bottom:3rem;}
+    .wizard-steps{display:flex;align-items:center;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;}
+    .wizard-step{display:flex;flex-direction:column;align-items:center;gap:.4rem;cursor:pointer;}
+    .wizard-step span{font-size:.72rem;color:var(--secondary-text);}
+    .wizard-step.active span,.wizard-step.done span{color:var(--primary-gold);}
+    .wizard-step-circle{width:40px;height:40px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:var(--secondary-text);background:var(--card-bg);transition:all .3s;position:relative;z-index:1;}
+    .wizard-step.active .wizard-step-circle{border-color:var(--primary-gold);color:var(--primary-gold);background:rgba(212,175,55,.1);box-shadow:0 0 0 4px rgba(212,175,55,.12);}
+    .wizard-step.done .wizard-step-circle{border-color:var(--success);background:var(--success);color:#fff;}
+    .wizard-step-line{height:2px;width:80px;background:var(--border-color);margin-bottom:1.4rem;transition:background .3s;}
+    .wizard-step-line.done{background:var(--primary-gold);}
+    .wizard-progress-bar{height:4px;background:var(--border-color);border-radius:2px;margin-top:.5rem;overflow:hidden;}
+    .wizard-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary-gold),#e7c356);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+    .wizard-panel{display:none;animation:panelFadeIn .35s ease-out;}
+    .wizard-panel.active{display:block;}
+    .wizard-panel-header{text-align:center;margin-bottom:2.5rem;}
+    .wizard-panel-icon{font-size:3rem;margin-bottom:.75rem;display:block;}
+    .wizard-panel-header h2{font-family:'Cinzel',serif;font-size:2rem;color:var(--primary-gold);margin-bottom:.5rem;}
+    .wizard-panel-header p{color:var(--secondary-text);max-width:600px;margin:0 auto;}
+    .wizard-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:760px;margin:0 auto 2rem;}
+    .wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border-color);max-width:760px;margin-left:auto;margin-right:auto;}
+    .btn-wizard-next{background:linear-gradient(135deg,var(--primary-gold),#b8960a);color:var(--dark-bg);border:none;border-radius:8px;padding:.75rem 2rem;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;}
+    .btn-wizard-next:hover{opacity:.9;transform:translateY(-1px);}
+    .btn-wizard-back{background:transparent;border:1px solid var(--border-active);color:var(--primary-gold);border-radius:8px;padding:.75rem 2rem;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s;}
+    .btn-wizard-back:hover{background:rgba(212,175,55,.08);}
+    .wiz-tier-card{background:var(--card-bg);border-radius:14px;border:1px solid var(--border-color);padding:1.5rem;margin-bottom:1rem;max-width:760px;margin-left:auto;margin-right:auto;position:relative;overflow:hidden;transition:border-color .2s;}
+    .wiz-tier-card::before{content:'';position:absolute;inset:0 auto 0 0;width:5px;background:var(--tier-color,var(--primary-gold));}
+    .wiz-tier-card:hover{border-color:var(--border-active);}
+    .wiz-tier-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+    .wiz-tier-label-input{font-family:'Cinzel',serif;background:transparent;border:none;border-bottom:1px solid var(--border-color);color:var(--light-text);font-size:1.1rem;font-weight:700;outline:none;padding:.2rem 0;max-width:200px;}
+    .wiz-tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+    .asset-tier-section{background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;max-width:760px;margin-left:auto;margin-right:auto;}
+    .asset-tier-title{font-family:'Cinzel',serif;font-size:1rem;color:var(--primary-gold);margin-bottom:1.25rem;}
+    .asset-upload-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .mini-upload{border:2px dashed var(--border-color);border-radius:10px;padding:1.25rem;text-align:center;cursor:pointer;background:var(--card-bg-2);transition:border-color .2s;}
+    .mini-upload:hover{border-color:var(--border-active);}
+    .mini-upload p{font-size:.78rem;color:var(--secondary-text);margin-top:.4rem;}
+    .mini-upload .upload-icon{font-size:1.75rem;}
+    .reveal-config-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;max-width:760px;margin:0 auto;}
+    .reveal-card{background:var(--card-bg);border:2px solid var(--border-color);border-radius:14px;padding:1.5rem;cursor:pointer;transition:border-color .25s,background .25s,transform .2s;}
+    .reveal-card:hover{border-color:var(--border-active);transform:translateY(-2px);}
+    .reveal-card.selected{border-color:var(--primary-gold);background:rgba(212,175,55,.06);}
+    .reveal-card-icon{font-size:2.5rem;margin-bottom:.75rem;display:block;}
+    .reveal-card h3{font-size:1rem;margin-bottom:.5rem;}
+    .reveal-card p{font-size:.82rem;color:var(--secondary-text);margin-bottom:1rem;line-height:1.5;}
+    .reveal-pros{list-style:none;font-size:.78rem;display:flex;flex-direction:column;gap:.3rem;}
+    .reveal-pros li{color:var(--success);}
+    .review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;max-width:760px;margin:0 auto 2rem;}
+    .review-block{background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:1.25rem;}
+    .review-block-title{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--primary-gold);margin-bottom:.75rem;font-weight:600;}
+    .review-item{display:flex;justify-content:space-between;font-size:.85rem;padding:.3rem 0;color:var(--secondary-text);}
+    .review-item span:last-child{color:var(--light-text);}
+    .deploy-cost-box{background:rgba(212,175,55,.06);border:1px solid var(--border-active);border-radius:12px;padding:1.5rem;max-width:760px;margin:0 auto 2rem;}
+    .deploy-cost-box h4{font-family:'Cinzel',serif;color:var(--primary-gold);font-size:.9rem;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+    .cost-breakdown{display:flex;flex-direction:column;gap:.5rem;}
+    .cost-row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--secondary-text);padding:.35rem 0;border-bottom:1px solid var(--border-color);}
+    .cost-row:last-child{border-bottom:none;}
+    .cost-row.total{font-weight:700;font-size:.95rem;}
+    .cost-row.total span:first-child{color:var(--light-text);}
+    .deploy-progress-wrapper{max-width:480px;margin:2rem auto;}
+    .deploy-steps-list{display:flex;flex-direction:column;gap:.75rem;}
+    .deploy-step-item{display:flex;align-items:center;gap:1rem;padding:.75rem 1rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:10px;font-size:.88rem;opacity:.4;transition:opacity .4s,border-color .4s;}
+    .deploy-step-item.active{opacity:1;border-color:var(--primary-gold);}
+    .deploy-step-item.complete{opacity:1;border-color:var(--success);color:var(--success);}
+    .deploy-step-icon{font-size:1.1rem;}
+    .deploy-step-spinner{width:16px;height:16px;border:2px solid rgba(212,175,55,.3);border-top-color:var(--primary-gold);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-left:auto;}
+    .success-card{text-align:center;padding:3rem 2rem;max-width:500px;margin:0 auto;background:var(--card-bg);border:1px solid var(--border-active);border-radius:20px;}
+    .success-icon{font-size:4rem;display:block;margin-bottom:1rem;animation:bounceIn .6s ease-out;}
+    @keyframes bounceIn{0%{transform:scale(0);opacity:0;}70%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+    .success-card h2{font-family:'Cinzel',serif;color:var(--primary-gold);margin-bottom:.75rem;}
+    .success-card p{color:var(--secondary-text);margin-bottom:1.5rem;}
+    .success-address{margin:1.5rem 0;text-align:left;}
+    .success-actions{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;}
+    .success-actions .btn-deploy{width:auto;flex:1;margin-top:0;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:#1f1e2a;border:1px solid var(--border-active);border-radius:50px;padding:.75rem 1.75rem;font-size:.9rem;font-weight:600;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s,transform .3s;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast.success{border-color:var(--success);color:var(--success);}
+    .toast.error{border-color:var(--error);color:var(--error);}
+    .toast.info{border-color:var(--primary-gold);color:var(--primary-gold);}
+
+    /* Footer */
+    .footer{text-align:center;padding:2rem;margin-top:4rem;border-top:1px solid var(--border-color);color:var(--secondary-text);font-size:.85rem;}
+
+    /* Responsive */
+    @media(max-width:1100px){.panel-layout,.gen-layout,.pack-mint-layout{grid-template-columns:1fr;}.panel-preview-col{order:-1;}.preview-sticky{position:static;}.studio-tabs{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:700px){.create-hero h1{font-size:2.2rem;}.studio-tabs{grid-template-columns:1fr 1fr;}.form-row,.wiz-tier-grid,.tier-fields{grid-template-columns:1fr;}.wizard-form-grid{grid-template-columns:1fr;}.reveal-config-grid,.review-grid{grid-template-columns:1fr;}.wizard-step-line{width:30px;}.reveal-toggle-group{grid-template-columns:1fr;}.gen-preview-grid{grid-template-columns:repeat(2,1fr);}}
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="wallet-status-banner" class="wallet-banner hidden"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">Throne Of Power 👑</a>
+            <ul class="nav-links">
+                <li><a href="index.html#collections">Collections</a></li>
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="create.html" class="nav-active">Create</a></li>
+                <li>
+                    <a href="#" class="btn btn-secondary" id="connect-wallet-btn">
+                        <span id="btn-text">Connect Wallet</span>
+                        <span id="btn-spinner" class="spinner hidden"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- CREATE HERO -->
+    <section class="create-hero">
+        <div class="create-hero-bg"></div>
+        <div class="create-hero-content">
+            <div class="studio-badge">⚒️ Creator Studio</div>
+            <h1>Build Your Kingdom</h1>
+            <p>Launch collections, generate NFT art, configure OG &amp; Whitelist phases — all from your browser. No code required.</p>
+        </div>
+    </section>
+
+    <!-- STUDIO MAIN -->
+    <main class="studio-main">
+        <div class="container">
+
+            <!-- TABS -->
+            <nav class="studio-tabs" role="tablist">
+                <button class="studio-tab active" data-tab="new-collection" role="tab">
+                    <span class="tab-icon">🏛️</span>
+                    <span class="tab-label">New Collection</span>
+                    <span class="tab-desc">Deploy a fresh NFT collection</span>
+                </button>
+                <button class="studio-tab" data-tab="generate" role="tab">
+                    <span class="tab-icon">✨</span>
+                    <span class="tab-label">Generate Art</span>
+                    <span class="tab-desc">AI trait layering engine</span>
+                </button>
+                <button class="studio-tab" data-tab="pack-mint" role="tab">
+                    <span class="tab-icon">📦</span>
+                    <span class="tab-label">NFT Pack Mint</span>
+                    <span class="tab-desc">Tiered pack drop system</span>
+                </button>
+                <button class="studio-tab" data-tab="pack-collection" role="tab">
+                    <span class="tab-icon">👑</span>
+                    <span class="tab-label">Pack Collection</span>
+                    <span class="tab-desc">Multi-tier reveal wizard</span>
+                </button>
+            </nav>
+
+            <!-- ══════════════════════════════════════════
+                 TAB 1 — NEW COLLECTION (FULLY REAL)
+                 ══════════════════════════════════════════ -->
+            <div id="tab-new-collection" class="tab-panel active">
+                <div class="panel-layout">
+
+                    <!-- LEFT: Form -->
+                    <div class="panel-form-col">
+                        <div class="panel-header">
+                            <h2>New Collection</h2>
+                            <p>Fill in the details below, upload your NFT images, configure your mint phases, and deploy — all live on Solana.</p>
+                        </div>
+
+                        <!-- Collection name -->
+                        <div class="form-group">
+                            <label class="form-label">Collection Name <span class="req">*</span></label>
+                            <input type="text" id="col-name" class="form-input" placeholder="e.g. Shadow Knights" maxlength="32" oninput="updatePreview()">
+                            <span class="char-count"><span id="col-name-count">0</span>/32</span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Symbol <span class="req">*</span></label>
+                                <input type="text" id="col-symbol" class="form-input" placeholder="SHDW" maxlength="10" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <select id="col-category" class="form-input form-select" onchange="updatePreview()">
+                                    <option value="art">Art</option>
+                                    <option value="gaming">Gaming</option>
+                                    <option value="pfp">PFP</option>
+                                    <option value="music">Music</option>
+                                    <option value="collectible">Collectible</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea id="col-desc" class="form-input form-textarea" placeholder="Describe your collection..." rows="3" maxlength="500" oninput="updatePreview()"></textarea>
+                            <span class="char-count"><span id="col-desc-count">0</span>/500</span>
+                        </div>
+
+                        <!-- NFT image upload zone -->
+                        <div class="form-group">
+                            <label class="form-label">NFT Image Files <span class="req">*</span></label>
+                            <div class="upload-zone" id="nft-files-zone">
+                                <div class="upload-zone-inner" id="nft-upload-inner">
+                                    <span class="upload-icon">🖼️</span>
+                                    <p class="upload-title">Drop your NFT images here or click to browse</p>
+                                    <p class="upload-hint">Name them 1.png, 2.png, 3.png… PNG · JPG · GIF · SVG</p>
+                                    <p class="upload-hint" style="margin-top:.3rem;font-size:.7rem;opacity:.55">Files upload to IPFS instantly — no local tools needed</p>
+                                </div>
+                                <input type="file" id="nft-files-input" accept="image/*" multiple style="display:none">
+                            </div>
+                            <div class="upload-progress-wrap">
+                                <div class="upload-progress-track">
+                                    <div id="upload-progress-bar" class="upload-progress-fill"></div>
+                                </div>
+                                <p id="upload-progress-text" class="upload-progress-text"></p>
+                            </div>
+                        </div>
+
+                        <!-- Supply and price -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Max Supply <span class="req">*</span></label>
+                                <input type="number" id="col-supply" class="form-input" placeholder="10000" min="1" max="100000" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Royalty</label>
+                                <input type="range" id="col-royalty" class="form-range" min="0" max="15" value="5" step="0.5" oninput="onRoyaltyChange(this)">
+                                <span class="range-display">Royalty: <span id="royalty-val" class="gold-val">5%</span></span>
+                            </div>
+                        </div>
+
+                        <!-- ── MINT PHASES ── -->
+                        <h3 class="phases-section-title">⚡ Mint Phases</h3>
+                        <p class="phases-section-sub">Configure up to 3 phases. OG and Whitelist use cryptographic wallet allowlists. Public is always the final open phase.</p>
+
+                        <!-- OG Phase -->
+                        <div class="phase-card" id="og-phase-card">
+                            <div class="phase-card-header">
+                                <div class="phase-card-left">
+                                    <span class="phase-icon">⚔️</span>
+                                    <div>
+                                        <span class="phase-name">OG Phase</span>
+                                        <span class="phase-sub">Exclusive early access — free or discounted</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="og-enabled" onchange="togglePhase('og',this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="phase-body hidden" id="og-phase-body">
+                                <div class="form-row" style="margin-top:.85rem">
+                                    <div class="form-group">
+                                        <label class="form-label">Start Date</label>
+                                        <input type="datetime-local" id="og-start" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">End Date</label>
+                                        <input type="datetime-local" id="og-end" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Price (SOL) — 0 = Free</label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">◎</span>
+                                            <input type="number" id="og-price" class="form-input" placeholder="0" step="0.01" min="0" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Max Per Wallet</label>
+                                        <input type="number" id="og-limit" class="form-input" placeholder="2" min="1" value="2">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">OG Wallet Addresses <span class="req">*</span> — one per line</label>
+                                    <textarea id="og-wallets" class="form-input form-textarea" rows="4"
+                                        placeholder="Paste Solana wallet addresses here&#10;One per line&#10;e.g. 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+                                        oninput="countWallets('og')"></textarea>
+                                    <span class="wallet-count-badge" id="og-wallet-count">0 wallets</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Whitelist Phase -->
+                        <div class="phase-card" id="wl-phase-card">
+                            <div class="phase-card-header">
+                                <div class="phase-card-left">
+                                    <span class="phase-icon">📋</span>
+                                    <div>
+                                        <span class="phase-name">Whitelist Phase</span>
+                                        <span class="phase-sub">Discounted community early mint</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="wl-enabled" onchange="togglePhase('wl',this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="phase-body hidden" id="wl-phase-body">
+                                <div class="form-row" style="margin-top:.85rem">
+                                    <div class="form-group">
+                                        <label class="form-label">Start Date</label>
+                                        <input type="datetime-local" id="wl-start" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">End Date</label>
+                                        <input type="datetime-local" id="wl-end" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Price (SOL) — 0 = Free</label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">◎</span>
+                                            <input type="number" id="wl-price" class="form-input" placeholder="0.5" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Max Per Wallet</label>
+                                        <input type="number" id="wl-limit" class="form-input" placeholder="3" min="1" value="3">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Whitelist Wallet Addresses <span class="req">*</span> — one per line</label>
+                                    <textarea id="wl-wallets" class="form-input form-textarea" rows="4"
+                                        placeholder="Paste Solana wallet addresses here&#10;One per line"
+                                        oninput="countWallets('wl')"></textarea>
+                                    <span class="wallet-count-badge" id="wl-wallet-count">0 wallets</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Public Phase (always on) -->
+                        <div class="phase-card phase-always-on">
+                            <div class="phase-card-header">
+                                <div class="phase-card-left">
+                                    <span class="phase-icon">🌐</span>
+                                    <div>
+                                        <span class="phase-name">Public Phase <small style="opacity:.55;font-size:.72rem">(required)</small></span>
+                                        <span class="phase-sub">Open mint — anyone can participate</span>
+                                    </div>
+                                </div>
+                                <span class="phase-always-label">Always ON</span>
+                            </div>
+                            <div class="phase-always-body">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Public Start Date</label>
+                                        <input type="datetime-local" id="pub-start" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Price (SOL) — 0 = Free <span class="req">*</span></label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">◎</span>
+                                            <input type="number" id="pub-price" class="form-input" placeholder="1.5" step="0.01" min="0" oninput="updatePreview()">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="max-width:220px">
+                                    <label class="form-label">Max Mints Per Wallet</label>
+                                    <input type="number" id="pub-limit" class="form-input" placeholder="10" min="1" value="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deploy button -->
+                        <button class="btn-deploy" id="deploy-collection-btn" onclick="deployCollection()">
+                            <span id="deploy-col-text">🚀 Deploy Collection on Solana</span>
+                            <span id="deploy-col-spinner" class="deploy-spinner hidden"></span>
+                        </button>
+
+                        <!-- Success card — shown after real deploy -->
+                        <div class="deploy-success-card hidden" id="col-deploy-success">
+                            <span class="success-icon-big">👑</span>
+                            <h3 id="success-col-name">Collection Name</h3>
+                            <div class="network-pill" id="success-network-pill">🔵 Devnet</div>
+                            <div class="address-block">
+                                <span class="address-label">Candy Machine Address</span>
+                                <div class="address-row">
+                                    <code id="success-cm-addr">—</code>
+                                    <button class="btn-ghost small" onclick="copyText('success-cm-addr')">Copy</button>
+                                </div>
+                            </div>
+                            <div class="address-block">
+                                <span class="address-label">Collection NFT Address</span>
+                                <div class="address-row">
+                                    <code id="success-coll-addr">—</code>
+                                    <button class="btn-ghost small" onclick="copyText('success-coll-addr')">Copy</button>
+                                </div>
+                            </div>
+                            <div class="mint-url-box">
+                                <span class="mint-url-label">🔗 Your Public Mint Page — share this with your community</span>
+                                <p class="mint-url-val" id="success-mint-url">—</p>
+                                <div class="mint-url-actions">
+                                    <button class="btn-ghost small" onclick="copyMintUrl()">Copy URL</button>
+                                    <a id="preview-mint-link" href="#" target="_blank" rel="noopener" class="btn-ghost small">Preview Mint Page ↗</a>
+                                </div>
+                            </div>
+                            <div class="deploy-success-actions">
+                                <a id="success-explorer-link" href="#" target="_blank" rel="noopener" class="btn-explorer">View on Explorer ↗</a>
+                                <button class="btn-ghost" onclick="resetCollectionForm()">Create Another</button>
+                            </div>
+                        </div>
+
+                    </div><!-- end panel-form-col -->
+
+                    <!-- RIGHT: Live preview -->
+                    <div class="panel-preview-col">
+                        <div class="preview-sticky">
+                            <h3 class="preview-title">Live Preview</h3>
+                            <div class="preview-card" id="collection-preview-card">
+                                <div class="preview-card-img" id="preview-img-area">
+                                    <span class="preview-placeholder-icon">🖼️</span>
+                                </div>
+                                <div class="preview-card-body">
+                                    <div class="preview-badge" id="preview-badge">ART</div>
+                                    <h3 id="preview-col-name">Your Collection Name</h3>
+                                    <p id="preview-col-symbol" class="preview-symbol">SYMB</p>
+                                    <p id="preview-col-desc" class="preview-desc">Your description will appear here...</p>
+                                    <div class="preview-stats">
+                                        <div class="preview-stat">
+                                            <span class="stat-label">Supply</span>
+                                            <span class="stat-val" id="preview-supply">—</span>
+                                        </div>
+                                        <div class="preview-stat">
+                                            <span class="stat-label">Price</span>
+                                            <span class="stat-val" id="preview-price">— SOL</span>
+                                        </div>
+                                        <div class="preview-stat">
+                                            <span class="stat-label">Royalty</span>
+                                            <span class="stat-val" id="preview-royalty">5%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="checklist">
+                                <h4>Launch Checklist</h4>
+                                <div class="check-item" id="check-name"><span class="check-dot"></span> Collection name</div>
+                                <div class="check-item" id="check-symbol"><span class="check-dot"></span> Symbol</div>
+                                <div class="check-item" id="check-images"><span class="check-dot"></span> NFT images uploaded</div>
+                                <div class="check-item" id="check-supply"><span class="check-dot"></span> Max supply</div>
+                                <div class="check-item" id="check-price"><span class="check-dot"></span> Public mint price</div>
+                                <div class="check-item" id="check-wallet"><span class="check-dot"></span> Wallet connected</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- end tab-new-collection -->
+
+            <!-- ══════════════════════════════════════════
+                 TAB 2 — GENERATE ART
+                 ══════════════════════════════════════════ -->
+            <div id="tab-generate" class="tab-panel">
+                <div class="panel-header">
+                    <h2>Generate Collection</h2>
+                    <p>Build trait layers, assign rarity weights, and generate thousands of unique NFT combinations.</p>
+                </div>
+                <div class="gen-layout">
+                    <div class="gen-layers-col">
+                        <div class="layers-header">
+                            <h3>Trait Layers</h3>
+                            <button class="btn-ghost" onclick="addLayer()">+ Add Layer</button>
+                        </div>
+                        <p class="layers-hint">Upper layers render on top. Click a trait to edit rarity.</p>
+                        <div id="layers-list"></div>
+                        <div class="gen-settings">
+                            <h3>Generation Settings</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Total NFTs to Generate</label>
+                                    <select id="gen-count" class="form-input form-select">
+                                        <option value="100">100</option>
+                                        <option value="500">500</option>
+                                        <option value="1000" selected>1,000</option>
+                                        <option value="5000">5,000</option>
+                                        <option value="10000">10,000</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Duplicate Check</label>
+                                    <select class="form-input form-select">
+                                        <option>Strict (no dupes)</option>
+                                        <option>Relaxed</option>
+                                        <option>Off</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Output Format</label>
+                                <div class="radio-group">
+                                    <label class="radio-item"><input type="radio" name="output-fmt" value="png" checked> PNG</label>
+                                    <label class="radio-item"><input type="radio" name="output-fmt" value="gif"> GIF (animated)</label>
+                                    <label class="radio-item"><input type="radio" name="output-fmt" value="svg"> SVG</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-deploy" onclick="runGeneration()">
+                            <span id="gen-btn-text">✨ Generate Collection</span>
+                            <span id="gen-spinner" class="deploy-spinner hidden"></span>
+                        </button>
+                    </div>
+                    <div class="gen-preview-col">
+                        <div class="gen-preview-header">
+                            <h3>Preview</h3>
+                            <button class="btn-ghost" onclick="refreshPreviews()">↻ Randomize</button>
+                        </div>
+                        <div class="gen-preview-grid" id="gen-preview-grid"></div>
+                        <div class="rarity-legend">
+                            <h4>Rarity Distribution</h4>
+                            <div id="rarity-bars"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════
+                 TAB 3 — NFT PACK MINT
+                 ══════════════════════════════════════════ -->
+            <div id="tab-pack-mint" class="tab-panel">
+                <div class="panel-header">
+                    <h2>NFT Pack Mint</h2>
+                    <p>Create tiered pack drops. Buyers get sealed packs and reveal NFTs after purchase.</p>
+                </div>
+                <div class="pack-mint-layout">
+                    <div class="pack-settings-col">
+                        <div class="form-group">
+                            <label class="form-label">Drop Name <span class="req">*</span></label>
+                            <input type="text" id="drop-name" class="form-input" placeholder="e.g. Genesis Pack Drop Season 1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pack Reveal Mechanic</label>
+                            <div class="reveal-toggle-group">
+                                <button class="reveal-option active" data-reveal="instant" onclick="setReveal('instant',this)">
+                                    <span class="reveal-icon">⚡</span><span>Instant Reveal</span><small>NFTs shown immediately</small>
+                                </button>
+                                <button class="reveal-option" data-reveal="delayed" onclick="setReveal('delayed',this)">
+                                    <span class="reveal-icon">🕐</span><span>Delayed Reveal</span><small>Hidden until reveal date</small>
+                                </button>
+                                <button class="reveal-option" data-reveal="random" onclick="setReveal('random',this)">
+                                    <span class="reveal-icon">🎲</span><span>Random Reveal</span><small>1–72 hrs random window</small>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="reveal-date-row" class="form-group hidden">
+                            <label class="form-label">Reveal Date &amp; Time</label>
+                            <input type="datetime-local" class="form-input" id="reveal-datetime">
+                        </div>
+                        <h3 class="section-sub-title">Pack Tiers</h3>
+                        <div id="pack-tiers-container"></div>
+                        <button class="btn-ghost full-width" onclick="addPackTier()">+ Add Tier</button>
+                        <div class="form-group" style="margin-top:2rem">
+                            <label class="form-label">Sale Start Date</label>
+                            <input type="datetime-local" class="form-input" id="sale-start">
+                        </div>
+                        <div class="toggle-row">
+                            <div>
+                                <span class="toggle-label">Enable Presale</span>
+                                <span class="toggle-hint">Whitelist gets early access before public sale</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="presale-toggle" onchange="togglePresale()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div id="presale-field" class="form-group hidden">
+                            <label class="form-label">Presale Window (hours before public)</label>
+                            <input type="number" class="form-input" placeholder="24" min="1" max="168">
+                        </div>
+                        <button class="btn-deploy" onclick="deployPackMint()">
+                            <span id="pack-deploy-text">📦 Deploy Pack Drop</span>
+                            <span id="pack-deploy-spinner" class="deploy-spinner hidden"></span>
+                        </button>
+                    </div>
+                    <div class="pack-preview-col">
+                        <h3 class="preview-title">Pack Preview</h3>
+                        <div id="pack-visual-preview"></div>
+                        <div class="pack-summary-box">
+                            <h4>Drop Summary</h4>
+                            <div id="pack-summary-content"><p class="summary-placeholder">Configure your tiers to see a summary</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════
+                 TAB 4 — PACK COLLECTION WIZARD
+                 ══════════════════════════════════════════ -->
+            <div id="tab-pack-collection" class="tab-panel">
+                <div class="wizard-progress">
+                    <div class="wizard-steps" id="wizard-steps">
+                        <div class="wizard-step active" data-step="1"><div class="wizard-step-circle">1</div><span>Collection</span></div>
+                        <div class="wizard-step-line"></div>
+                        <div class="wizard-step" data-step="2"><div class="wizard-step-circle">2</div><span>Tiers</span></div>
+                        <div class="wizard-step-line"></div>
+                        <div class="wizard-step" data-step="3"><div class="wizard-step-circle">3</div><span>Assets</span></div>
+                        <div class="wizard-step-line"></div>
+                        <div class="wizard-step" data-step="4"><div class="wizard-step-circle">4</div><span>Reveal</span></div>
+                        <div class="wizard-step-line"></div>
+                        <div class="wizard-step" data-step="5"><div class="wizard-step-circle">5</div><span>Deploy</span></div>
+                    </div>
+                    <div class="wizard-progress-bar">
+                        <div class="wizard-progress-fill" id="wizard-progress-fill" style="width:20%"></div>
+                    </div>
+                </div>
+                <div id="wizard-panels">
+                    <!-- Step 1 -->
+                    <div class="wizard-panel active" data-panel="1">
+                        <div class="wizard-panel-header">
+                            <span class="wizard-panel-icon">🏛️</span>
+                            <h2>Collection Identity</h2>
+                            <p>Set the name, branding, and core settings for your pack-based collection.</p>
+                        </div>
+                        <div class="wizard-form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Collection Name <span class="req">*</span></label>
+                                <input type="text" id="wiz-col-name" class="form-input" placeholder="e.g. Royal Artifact Packs">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">On-Chain Symbol <span class="req">*</span></label>
+                                <input type="text" id="wiz-col-symbol" class="form-input" placeholder="RKAP" maxlength="10">
+                            </div>
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-input form-textarea" placeholder="What makes this collection legendary?" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Creator Royalty</label>
+                                <input type="range" class="form-range" min="0" max="15" value="5" id="wiz-royalty" oninput="document.getElementById('wiz-royalty-val').textContent=this.value+'%'">
+                                <span class="range-display">Royalty: <span id="wiz-royalty-val" class="gold-val">5%</span></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Blockchain</label>
+                                <select class="form-input form-select">
+                                    <option>Solana (SOL)</option>
+                                    <option disabled>Ethereum (coming soon)</option>
+                                    <option disabled>Polygon (coming soon)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="wizard-nav">
+                            <span></span>
+                            <button class="btn-wizard-next" onclick="wizardNext(1)">Next: Define Tiers →</button>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="wizard-panel" data-panel="2">
+                        <div class="wizard-panel-header">
+                            <span class="wizard-panel-icon">🎖️</span>
+                            <h2>Define Pack Tiers</h2>
+                            <p>Create rarity tiers for your pack collection. Each tier has its own price, supply, and NFT count.</p>
+                        </div>
+                        <div id="wiz-tiers-container"></div>
+                        <button class="btn-ghost" style="margin-bottom:1.5rem;max-width:760px;margin-left:auto;margin-right:auto;display:flex" onclick="addWizardTier()">+ Add Tier</button>
+                        <div class="wizard-nav">
+                            <button class="btn-wizard-back" onclick="wizardBack(2)">← Back</button>
+                            <button class="btn-wizard-next" onclick="wizardNext(2)">Next: Upload Assets →</button>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="wizard-panel" data-panel="3">
+                        <div class="wizard-panel-header">
+                            <span class="wizard-panel-icon">🎨</span>
+                            <h2>Upload Pack Assets</h2>
+                            <p>Upload the artwork for each tier's pack card and the NFTs inside each pack.</p>
+                        </div>
+                        <div id="wiz-assets-container"></div>
+                        <div class="wizard-nav">
+                            <button class="btn-wizard-back" onclick="wizardBack(3)">← Back</button>
+                            <button class="btn-wizard-next" onclick="wizardNext(3)">Next: Reveal Config →</button>
+                        </div>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="wizard-panel" data-panel="4">
+                        <div class="wizard-panel-header">
+                            <span class="wizard-panel-icon">🎭</span>
+                            <h2>Reveal Mechanics</h2>
+                            <p>Control how and when holders discover what's inside their packs.</p>
+                        </div>
+                        <div class="reveal-config-grid">
+                            <div class="reveal-card" data-type="instant" onclick="selectRevealType('instant',this)">
+                                <span class="reveal-card-icon">⚡</span>
+                                <h3>Instant Reveal</h3>
+                                <p>Packs reveal immediately when opened. NFT metadata is live from mint day.</p>
+                                <ul class="reveal-pros"><li>✓ Immediate gratification</li><li>✓ No waiting period</li><li>✓ Simpler smart contract</li></ul>
+                            </div>
+                            <div class="reveal-card" data-type="timed" onclick="selectRevealType('timed',this)">
+                                <span class="reveal-card-icon">⏱️</span>
+                                <h3>Timed Reveal</h3>
+                                <p>All packs reveal simultaneously on a specific date. Builds massive anticipation.</p>
+                                <ul class="reveal-pros"><li>✓ Community event</li><li>✓ Hype &amp; FOMO marketing</li><li>✓ Fair distribution</li></ul>
+                            </div>
+                            <div class="reveal-card" data-type="sequential" onclick="selectRevealType('sequential',this)">
+                                <span class="reveal-card-icon">🔢</span>
+                                <h3>Sequential Reveal</h3>
+                                <p>Each pack reveals 24–48h after purchase. Staggered discovery keeps interest alive.</p>
+                                <ul class="reveal-pros"><li>✓ Extended engagement</li><li>✓ Organic social moments</li><li>✓ No gas wars</li></ul>
+                            </div>
+                            <div class="reveal-card" data-type="holder" onclick="selectRevealType('holder',this)">
+                                <span class="reveal-card-icon">🗝️</span>
+                                <h3>Holder-Triggered</h3>
+                                <p>Holders choose when to reveal. Burn the pack NFT to unlock the contents.</p>
+                                <ul class="reveal-pros"><li>✓ Holder controls timing</li><li>✓ Burn creates scarcity</li><li>✓ Pack NFTs have own value</li></ul>
+                            </div>
+                        </div>
+                        <div id="reveal-settings-extra" class="hidden" style="max-width:760px;margin:1.5rem auto 0">
+                            <div class="form-group">
+                                <label class="form-label">Reveal Date &amp; Time</label>
+                                <input type="datetime-local" class="form-input" id="wiz-reveal-date">
+                            </div>
+                        </div>
+                        <div class="form-group" style="max-width:760px;margin:2rem auto 0">
+                            <label class="form-label">Pre-Reveal Placeholder Image</label>
+                            <div class="upload-zone" onclick="document.getElementById('placeholder-file').click()">
+                                <div class="upload-zone-inner">
+                                    <span class="upload-icon">🎭</span>
+                                    <p class="upload-title">Upload mystery box artwork</p>
+                                    <p class="upload-hint">Shown while packs are sealed</p>
+                                </div>
+                                <input type="file" id="placeholder-file" accept="image/*" style="display:none">
+                            </div>
+                        </div>
+                        <div class="wizard-nav">
+                            <button class="btn-wizard-back" onclick="wizardBack(4)">← Back</button>
+                            <button class="btn-wizard-next" onclick="wizardNext(4)">Next: Review &amp; Deploy →</button>
+                        </div>
+                    </div>
+                    <!-- Step 5 -->
+                    <div class="wizard-panel" data-panel="5">
+                        <div class="wizard-panel-header">
+                            <span class="wizard-panel-icon">🚀</span>
+                            <h2>Review &amp; Deploy</h2>
+                            <p>Review your complete pack collection before deploying to Solana.</p>
+                        </div>
+                        <div id="review-summary" class="review-grid"></div>
+                        <div class="deploy-cost-box">
+                            <h4>Estimated Deployment Cost</h4>
+                            <div class="cost-breakdown">
+                                <div class="cost-row"><span>Collection NFT creation</span><span>~0.010 SOL</span></div>
+                                <div class="cost-row"><span>Candy Machine setup</span><span>~0.012 SOL</span></div>
+                                <div class="cost-row"><span>Metadata accounts</span><span>~0.002 SOL × tiers</span></div>
+                                <div class="cost-row total"><span>Total Estimate</span><span class="gold-val">~0.025 SOL</span></div>
+                            </div>
+                        </div>
+                        <div id="deploy-animation" class="hidden">
+                            <div class="deploy-progress-wrapper">
+                                <div class="deploy-steps-list" id="deploy-steps-list"></div>
+                            </div>
+                        </div>
+                        <div id="deploy-success" class="hidden">
+                            <div class="success-card">
+                                <span class="success-icon">👑</span>
+                                <h2>Collection Deployed!</h2>
+                                <p>Your pack collection is live on Solana. Share it with your community.</p>
+                                <div class="success-address">
+                                    <span class="form-label">Contract Address</span>
+                                    <div class="address-row">
+                                        <code id="success-address-val">—</code>
+                                        <button class="btn-ghost small" onclick="copyAddress()">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="success-actions">
+                                    <button class="btn-deploy" style="margin-top:0" onclick="viewOnExplorer()">View on Explorer</button>
+                                    <button class="btn-ghost" onclick="resetWizard()">Create Another</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="wizard-deploy-btn-wrap" class="wizard-nav">
+                            <button class="btn-wizard-back" onclick="wizardBack(5)">← Back</button>
+                            <button class="btn-deploy" style="width:auto;margin-top:0" onclick="deployPackCollection()">
+                                <span id="wiz-deploy-text">👑 Deploy Pack Collection</span>
+                                <span id="wiz-deploy-spinner" class="deploy-spinner hidden"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end tab-pack-collection -->
+
+        </div><!-- end container -->
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Throne Of Power. All Rights Reserved.</p>
+    </footer>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="wallet.js"></script>
+    <script src="mint-handler.js"></script>
+    <script src="creator-upload.js"></script>
+    <script src="create-script.js"></script>
+</body>
+</html>

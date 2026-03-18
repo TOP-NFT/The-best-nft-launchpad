@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Throne Of Power — Solana NFT Launchpad</title>
+    <meta name="description" content="The no-code Solana NFT launchpad. Deploy collections, manage phases, and mint — all from your browser.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================================
+           SELF-CONTAINED STYLES
+           All CSS is here — no need for style.css or index-extra.css
+           for this page. style.css is still used by create.html and
+           mint.html — leave it in your project for those pages.
+           ============================================================ */
+
+        :root {
+            --dark-bg:       #100f15;
+            --primary-gold:  #d4af37;
+            --light-text:    #f0f0f0;
+            --secondary-text:#a0a0a0;
+            --card-bg:       #1a1a22;
+            --border-color:  rgba(212,175,55,0.2);
+            --success-green: #2ecc71;
+            --error-red:     #e74c3c;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body {
+            font-family:'Poppins',sans-serif;
+            background-color:var(--dark-bg);
+            color:var(--light-text);
+            cursor:none;
+            overflow-x:hidden;
+        }
+
+        /* Custom cursor */
+        #cursor {
+            position:fixed; width:20px; height:20px;
+            border:2px solid var(--primary-gold); border-radius:50%;
+            left:0; top:0; pointer-events:none;
+            transform:translate(-50%,-50%);
+            transition:width .2s,height .2s;
+            z-index:9999;
+        }
+        body:hover #cursor { width:40px; height:40px; }
+
+        /* Wallet banner */
+        .wallet-banner {
+            position:fixed; top:0; left:0; width:100%;
+            padding:.8rem 2rem; text-align:center;
+            font-size:.9rem; font-weight:600; z-index:2000;
+        }
+        .wallet-banner.success { background:var(--success-green); color:#fff; }
+        .wallet-banner.error   { background:var(--error-red); color:#fff; }
+        .wallet-banner.hidden  { display:none; }
+
+        /* Layout */
+        .container { max-width:1200px; margin:0 auto; padding:0 2rem; }
+
+        /* Buttons */
+        .btn {
+            display:inline-flex; align-items:center; gap:8px;
+            padding:12px 28px; border-radius:50px;
+            text-decoration:none; font-weight:600;
+            font-family:'Poppins',sans-serif;
+            transition:transform .2s,background-color .2s;
+            border:none; cursor:pointer; font-size:.95rem;
+        }
+        .btn-primary { background:var(--primary-gold); color:var(--dark-bg); }
+        .btn-primary:hover { transform:translateY(-3px); background:#e7c356; }
+        .btn-secondary { background:transparent; color:var(--primary-gold); border:2px solid var(--primary-gold); }
+        .btn-secondary:hover { background:var(--primary-gold); color:var(--dark-bg); }
+        .btn-secondary.connected { border-color:var(--success-green); color:var(--success-green); }
+        .btn-secondary.connected:hover { background:var(--error-red); border-color:var(--error-red); color:#fff; }
+
+        /* Spinner */
+        .spinner { width:14px; height:14px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+        .spinner.hidden { display:none; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* Section title */
+        .section-title { font-family:'Cinzel',serif; font-size:2.6rem; text-align:center; margin-bottom:3rem; color:var(--primary-gold); }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position:fixed; width:100%; top:0; padding:1.25rem 0;
+            background:rgba(16,15,21,0.88); backdrop-filter:blur(12px);
+            z-index:1000; border-bottom:1px solid var(--border-color);
+        }
+        .navbar .container { display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-family:'Cinzel',serif; font-size:1.4rem; color:var(--light-text); text-decoration:none; }
+        .nav-links { display:flex; align-items:center; list-style:none; gap:1.75rem; }
+        .nav-links a { color:var(--light-text); text-decoration:none; font-weight:400; font-size:.92rem; transition:color .2s; }
+        .nav-links a:not(.btn):hover { color:var(--primary-gold); }
+
+        .mobile-menu-btn { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:.5rem; }
+        .mobile-menu-btn span { display:block; width:24px; height:2px; background:var(--light-text); border-radius:2px; }
+
+        .mobile-nav { background:rgba(16,15,21,.97); border-top:1px solid var(--border-color); padding:1.25rem 2rem; display:flex; flex-direction:column; gap:1rem; }
+        .mobile-nav.hidden { display:none; }
+        .mobile-nav a { color:var(--light-text); text-decoration:none; font-size:1rem; padding:.4rem 0; border-bottom:1px solid var(--border-color); transition:color .2s; }
+        .mobile-nav a:hover { color:var(--primary-gold); }
+        .mobile-connect { color:var(--primary-gold) !important; font-weight:600; }
+
+        @media(max-width:900px){ .mobile-menu-btn{ display:flex; } .nav-links{ display:none; } }
+
+        /* ── HERO ── */
+        .hero {
+            position:relative;          /* REQUIRED for .hero-stats absolute positioning */
+            height:100vh; min-height:620px;
+            display:flex; align-items:center; justify-content:center;
+            text-align:center; padding:0 2rem;
+            background:
+                radial-gradient(circle,rgba(26,26,34,0.78) 0%,var(--dark-bg) 70%),
+                url('https://picsum.photos/seed/throne/1920/1080') no-repeat center/cover;
+        }
+        .hero-content { display:flex; flex-direction:column; align-items:center; max-width:800px; }
+        .hero-badge {
+            display:inline-block;
+            background:rgba(212,175,55,.12); border:1px solid rgba(212,175,55,.3);
+            border-radius:50px; padding:.35rem 1rem;
+            font-size:.8rem; color:var(--primary-gold); font-weight:600; margin-bottom:1.25rem;
+        }
+        .hero-content h1 {
+            font-family:'Cinzel',serif;
+            font-size:clamp(2.4rem,5.5vw,4.5rem);
+            line-height:1.15; margin-bottom:1rem;
+        }
+        .subtitle { font-size:1.35rem; color:var(--secondary-text); margin-bottom:.5rem; min-height:2rem; }
+        .cursor-blink {
+            display:inline-block; background:var(--primary-gold);
+            width:3px; height:1.2em; vertical-align:middle;
+            animation:blink 1s infinite; margin-left:2px;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .hero-cta-group { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.75rem; margin-bottom:2rem; }
+
+        .hero-stats {
+            position:absolute; bottom:2.5rem; left:50%;
+            transform:translateX(-50%);
+            display:flex; gap:.75rem; flex-wrap:wrap; justify-content:center;
+        }
+        .hero-stat-pill {
+            background:rgba(16,15,21,.78); border:1px solid var(--border-color);
+            border-radius:50px; padding:.4rem 1.1rem;
+            display:flex; align-items:center; gap:.5rem;
+            backdrop-filter:blur(10px);
+        }
+        .pill-val { font-family:'Cinzel',serif; font-size:.9rem; color:var(--primary-gold); font-weight:700; }
+        .pill-label { font-size:.7rem; color:var(--secondary-text); }
+
+        /* ── COLLECTIONS ── */
+        .collections-section {
+            padding:6rem 0;
+            opacity:0; transform:translateY(50px);
+            transition:opacity .6s ease-out,transform .6s ease-out;
+        }
+        .collections-section.visible { opacity:1; transform:none; }
+
+        .collection-filters { display:flex; gap:.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:2rem; }
+        .filter-btn {
+            padding:.4rem 1rem; border-radius:50px;
+            border:1px solid var(--border-color); background:transparent;
+            color:var(--secondary-text); font-size:.8rem; cursor:pointer;
+            transition:all .2s; font-family:'Poppins',sans-serif;
+        }
+        .filter-btn.active,.filter-btn:hover { background:var(--primary-gold); border-color:var(--primary-gold); color:var(--dark-bg); font-weight:600; }
+
+        .collection-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:2rem; }
+
+        .nft-card {
+            background:var(--card-bg); border:1px solid var(--border-color);
+            border-radius:15px; overflow:hidden;
+            display:flex; flex-direction:column;
+            transition:transform .3s,box-shadow .3s;
+            will-change:transform; position:relative;
+        }
+        .nft-card.featured { border-color:rgba(212,175,55,.45); }
+        .nft-card:hover { box-shadow:0 10px 30px rgba(212,175,55,.2); }
+        .nft-card img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+
+        .card-phase-badge {
+            position:absolute; top:.75rem; left:.75rem; z-index:2;
+            padding:.22rem .75rem; border-radius:50px; font-size:.7rem; font-weight:600;
+        }
+        .card-phase-badge.minting  { background:rgba(46,204,113,.9); color:#fff; }
+        .card-phase-badge.upcoming { background:rgba(212,175,55,.9); color:#100f15; }
+        .card-phase-badge.soldout  { background:rgba(231,76,60,.9);  color:#fff; }
+
+        .card-info { padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:.75rem; flex:1; }
+        .card-info-top { display:flex; justify-content:space-between; align-items:flex-start; }
+        .card-info h3 { font-size:1.15rem; margin-bottom:.15rem; }
+        .card-creator { font-size:.78rem; color:var(--secondary-text); }
+        .card-network-badge {
+            font-size:.7rem; color:var(--primary-gold);
+            background:rgba(212,175,55,.1); border:1px solid var(--border-color);
+            border-radius:6px; padding:.18rem .5rem; white-space:nowrap; flex-shrink:0;
+        }
+
+        .card-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; }
+        .card-stat { background:rgba(255,255,255,.03); border:1px solid var(--border-color); border-radius:8px; padding:.4rem .5rem; text-align:center; }
+        .cs-label { display:block; font-size:.62rem; color:var(--secondary-text); margin-bottom:.1rem; }
+        .cs-val   { display:block; font-size:.82rem; font-weight:600; }
+
+        .card-progress-wrap { display:flex; align-items:center; gap:.5rem; }
+        .card-progress-track { flex:1; height:5px; background:rgba(212,175,55,.12); border-radius:3px; overflow:hidden; }
+        .card-progress-fill { height:100%; background:var(--primary-gold); border-radius:3px; transition:width .5s; }
+        .card-progress-fill.sold { background:var(--error-red); }
+        .card-progress-pct { font-size:.68rem; color:var(--secondary-text); white-space:nowrap; }
+
+        .btn-card-mint {
+            display:block; width:100%; padding:.7rem;
+            background:var(--primary-gold); color:var(--dark-bg);
+            text-align:center; border-radius:10px; font-weight:600; font-size:.88rem;
+            text-decoration:none; transition:background .2s,transform .2s;
+            margin-top:auto; border:none; cursor:pointer; font-family:'Poppins',sans-serif;
+        }
+        .btn-card-mint:hover { background:#e7c356; transform:translateY(-1px); }
+        .btn-card-upcoming { background:transparent; border:1px solid var(--primary-gold); color:var(--primary-gold); }
+        .btn-card-upcoming:hover { background:var(--primary-gold); color:var(--dark-bg); transform:none; }
+        .btn-card-sold { background:rgba(231,76,60,.1); border:1px solid rgba(231,76,60,.3); color:var(--error-red); cursor:not-allowed; }
+        .btn-card-sold:hover { transform:none; }
+
+        .empty-collections { text-align:center; padding:5rem 2rem; color:var(--secondary-text); }
+        .empty-collections span.empty-icon { font-size:3rem; margin-bottom:1rem; display:block; }
+        .empty-collections h3 { font-family:'Cinzel',serif; font-size:1.4rem; margin-bottom:.5rem; color:var(--light-text); }
+        .empty-collections.hidden { display:none; }
+
+        /* ── STATS BAR ── */
+        .stats-section {
+            padding:2.5rem 0;
+            background:rgba(212,175,55,.03);
+            border-top:1px solid var(--border-color);
+            border-bottom:1px solid var(--border-color);
+        }
+        .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; text-align:center; }
+        @media(max-width:700px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+        .stat-box-val { display:block; font-family:'Cinzel',serif; font-size:2rem; color:var(--primary-gold); font-weight:700; }
+        .stat-box-label { display:block; font-size:.78rem; color:var(--secondary-text); margin-top:.2rem; }
+
+        /* ── HOW IT WORKS ── */
+        .how-it-works-section {
+            padding:6rem 0;
+            opacity:0; transform:translateY(50px);
+            transition:opacity .6s ease-out,transform .6s ease-out;
+        }
+        .how-it-works-section.visible { opacity:1; transform:none; }
+        .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:3rem; text-align:center; }
+        .step-number {
+            font-size:2.5rem; font-weight:700; color:var(--primary-gold);
+            margin-bottom:1rem; border:2px solid var(--border-color);
+            width:72px; height:72px; border-radius:50%;
+            display:inline-flex; align-items:center; justify-content:center;
+        }
+        .step h3 { font-size:1.05rem; margin-bottom:.5rem; }
+        .step p  { font-size:.85rem; color:var(--secondary-text); line-height:1.65; }
+
+        /* ── FEATURES ── */
+        .features-section {
+            padding:6rem 0;
+            opacity:0; transform:translateY(50px);
+            transition:opacity .6s ease-out,transform .6s ease-out;
+        }
+        .features-section.visible { opacity:1; transform:none; }
+        .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; }
+        .feature-card {
+            background:var(--card-bg); border:1px solid var(--border-color);
+            border-radius:15px; padding:1.75rem;
+            transition:border-color .2s,transform .2s;
+        }
+        .feature-card:hover { border-color:rgba(212,175,55,.4); transform:translateY(-3px); }
+        .feature-icon { font-size:1.75rem; margin-bottom:.75rem; display:block; }
+        .feature-card h3 { font-size:1rem; font-weight:600; margin-bottom:.5rem; }
+        .feature-card p  { font-size:.84rem; color:var(--secondary-text); line-height:1.65; }
+
+        /* ── LAUNCH CTA ── */
+        .launch-section {
+            padding:6rem 0;
+            opacity:0; transform:translateY(50px);
+            transition:opacity .6s ease-out,transform .6s ease-out;
+        }
+        .launch-section.visible { opacity:1; transform:none; }
+        .launch-card {
+            background:var(--card-bg); border:1px solid rgba(212,175,55,.4);
+            border-radius:20px; padding:4rem 3rem; text-align:center;
+        }
+        .launch-card h2 { font-family:'Cinzel',serif; font-size:2rem; color:var(--primary-gold); margin-bottom:1rem; }
+        .launch-card p  { font-size:.98rem; color:var(--secondary-text); max-width:540px; margin:0 auto 2rem; line-height:1.7; }
+        .launch-cta-group { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem; }
+        .launch-note { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; font-size:.8rem; color:var(--secondary-text); }
+
+        /* ── FOOTER ── */
+        .footer { padding:3rem 0 1.5rem; border-top:1px solid var(--border-color); }
+        .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:2.5rem; margin-bottom:2rem; }
+        @media(max-width:768px){ .footer-grid{ grid-template-columns:1fr 1fr; } }
+        @media(max-width:480px){ .footer-grid{ grid-template-columns:1fr; } }
+        .footer-logo { font-family:'Cinzel',serif; font-size:1.1rem; color:var(--light-text); display:block; margin-bottom:.75rem; }
+        .footer-brand p { font-size:.82rem; color:var(--secondary-text); line-height:1.6; }
+        .footer-links-group h4 { font-size:.78rem; font-weight:600; color:var(--light-text); margin-bottom:.75rem; text-transform:uppercase; letter-spacing:.06em; }
+        .footer-links-group a { display:block; font-size:.82rem; color:var(--secondary-text); text-decoration:none; margin-bottom:.5rem; transition:color .2s; }
+        .footer-links-group a:hover { color:var(--primary-gold); }
+        .footer-bottom { display:flex; justify-content:space-between; align-items:center; padding-top:1.5rem; border-top:1px solid var(--border-color); font-size:.8rem; color:var(--secondary-text); flex-wrap:wrap; gap:.5rem; }
+        .footer-network-badge { background:rgba(212,175,55,.08); border:1px solid var(--border-color); border-radius:50px; padding:.25rem .75rem; font-size:.75rem; color:var(--primary-gold); }
+
+        @media(max-width:600px){
+            .section-title { font-size:1.9rem; }
+            .launch-card { padding:2.5rem 1.25rem; }
+            .launch-card h2 { font-size:1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="wallet-status-banner" class="wallet-banner hidden"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">Throne Of Power 👑</a>
+            <ul class="nav-links">
+                <li><a href="#collections">Collections</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#launch">Launch</a></li>
+                <li><a href="#collections" class="btn btn-primary">Explore</a></li>
+                <li><a href="create.html" class="btn btn-secondary">⚒️ Creator Studio</a></li>
+                <li>
+                    <a href="#" class="btn btn-secondary" id="connect-wallet-btn">
+                        <span id="btn-text">Connect Wallet</span>
+                        <span id="btn-spinner" class="spinner hidden"></span>
+                    </a>
+                </li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <div class="mobile-nav hidden" id="mobile-nav">
+            <a href="#collections"  onclick="closeMobileNav()">Collections</a>
+            <a href="#how-it-works" onclick="closeMobileNav()">How It Works</a>
+            <a href="create.html">⚒️ Creator Studio</a>
+            <a href="#" id="mobile-connect-btn" class="mobile-connect">Connect Wallet</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">⚡ Powered by Solana</div>
+            <h1>Claim Your<br>Digital Throne.</h1>
+            <p class="subtitle">
+                <span id="typed-text"></span><span class="cursor-blink"></span>
+            </p>
+            <div class="hero-cta-group">
+                <a href="#collections" class="btn btn-primary">Explore Collections</a>
+                <a href="create.html"  class="btn btn-secondary">Launch a Collection</a>
+            </div>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat-pill">
+                <span class="pill-val" id="hero-stat-collections">0</span>
+                <span class="pill-label">Collections</span>
+            </div>
+            <div class="hero-stat-pill">
+                <span class="pill-val" id="hero-stat-minted">0</span>
+                <span class="pill-label">NFTs Minted</span>
+            </div>
+            <div class="hero-stat-pill">
+                <span class="pill-val">Solana</span>
+                <span class="pill-label">Blockchain</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- LIVE COLLECTIONS -->
+        <section id="collections" class="collections-section">
+            <div class="container">
+                <h2 class="section-title">Live Collections</h2>
+                <div class="collection-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="minting">🟢 Minting Now</button>
+                    <button class="filter-btn" data-filter="upcoming">⏳ Upcoming</button>
+                    <button class="filter-btn" data-filter="soldout">🔴 Sold Out</button>
+                </div>
+                <div class="collection-grid" id="live-collection-grid">
+
+                    <div class="nft-card featured">
+                        <div class="card-phase-badge minting">🟢 Minting Now</div>
+                        <img src="https://picsum.photos/seed/king/400/400" alt="Royal Golems">
+                        <div class="card-info">
+                            <div class="card-info-top">
+                                <div><h3>Royal Golems</h3><p class="card-creator">By The Forge</p></div>
+                                <div class="card-network-badge">◎ SOL</div>
+                            </div>
+                            <div class="card-stats">
+                                <div class="card-stat"><span class="cs-label">Price</span><span class="cs-val">◎ 1.5</span></div>
+                                <div class="card-stat"><span class="cs-label">Supply</span><span class="cs-val">3,333</span></div>
+                                <div class="card-stat"><span class="cs-label">Minted</span><span class="cs-val">1,400</span></div>
+                            </div>
+                            <div class="card-progress-wrap">
+                                <div class="card-progress-track"><div class="card-progress-fill" style="width:42%"></div></div>
+                                <span class="card-progress-pct">42% minted</span>
+                            </div>
+                            <a href="create.html" class="btn-card-mint">Deploy Your Own →</a>
+                        </div>
+                    </div>
+
+                    <div class="nft-card">
+                        <div class="card-phase-badge upcoming">⏳ Upcoming</div>
+                        <img src="https://picsum.photos/seed/queen/400/400" alt="Ethernal Queens">
+                        <div class="card-info">
+                            <div class="card-info-top">
+                                <div><h3>Ethernal Queens</h3><p class="card-creator">By Celestial Art</p></div>
+                                <div class="card-network-badge">◎ SOL</div>
+                            </div>
+                            <div class="card-stats">
+                                <div class="card-stat"><span class="cs-label">Price</span><span class="cs-val">◎ 2.0</span></div>
+                                <div class="card-stat"><span class="cs-label">Supply</span><span class="cs-val">5,000</span></div>
+                                <div class="card-stat"><span class="cs-label">Phase</span><span class="cs-val">WL</span></div>
+                            </div>
+                            <div class="card-progress-wrap">
+                                <div class="card-progress-track"><div class="card-progress-fill" style="width:0%"></div></div>
+                                <span class="card-progress-pct">Not started</span>
+                            </div>
+                            <a href="create.html" class="btn-card-mint btn-card-upcoming">Coming Soon</a>
+                        </div>
+                    </div>
+
+                    <div class="nft-card">
+                        <div class="card-phase-badge soldout">🔴 Sold Out</div>
+                        <img src="https://picsum.photos/seed/knight/400/400" alt="Shadow Knights">
+                        <div class="card-info">
+                            <div class="card-info-top">
+                                <div><h3>Shadow Knights</h3><p class="card-creator">By The Abyss</p></div>
+                                <div class="card-network-badge">◎ SOL</div>
+                            </div>
+                            <div class="card-stats">
+                                <div class="card-stat"><span class="cs-label">Price</span><span class="cs-val">◎ 0.5</span></div>
+                                <div class="card-stat"><span class="cs-label">Supply</span><span class="cs-val">10,000</span></div>
+                                <div class="card-stat"><span class="cs-label">Minted</span><span class="cs-val">10,000</span></div>
+                            </div>
+                            <div class="card-progress-wrap">
+                                <div class="card-progress-track"><div class="card-progress-fill sold" style="width:100%"></div></div>
+                                <span class="card-progress-pct">100% — Sold Out</span>
+                            </div>
+                            <a href="#" class="btn-card-mint btn-card-sold">Sold Out</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="empty-collections hidden" id="empty-collections">
+                    <span class="empty-icon">🏰</span>
+                    <h3>No collections yet</h3>
+                    <p>Be the first to launch a collection on Throne Of Power.</p>
+                    <a href="create.html" class="btn btn-primary" style="margin-top:1.5rem;display:inline-flex">Launch Your Collection</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLATFORM STATS -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div><span class="stat-box-val" id="stat-total-collections">0</span><span class="stat-box-label">Collections Deployed</span></div>
+                    <div><span class="stat-box-val" id="stat-total-minted">0</span><span class="stat-box-label">NFTs Minted</span></div>
+                    <div><span class="stat-box-val">Free</span><span class="stat-box-label">To Create</span></div>
+                    <div><span class="stat-box-val">~45s</span><span class="stat-box-label">Deploy Time</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section id="how-it-works" class="how-it-works-section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="steps-grid">
+                    <div class="step"><div class="step-number">1</div><h3>Connect Phantom</h3><p>Link your Solana wallet in one click. Works with Phantom and Solflare.</p></div>
+                    <div class="step"><div class="step-number">2</div><h3>Upload &amp; Configure</h3><p>Drop your NFT images, set your OG / Whitelist / Public phases and prices.</p></div>
+                    <div class="step"><div class="step-number">3</div><h3>Deploy On-Chain</h3><p>One click creates a real Candy Machine v3 on Solana in about 45 seconds.</p></div>
+                    <div class="step"><div class="step-number">4</div><h3>Share &amp; Earn</h3><p>Share your mint page URL. Community mints, royalties flow to your wallet forever.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="features-section">
+            <div class="container">
+                <h2 class="section-title">Built For Creators</h2>
+                <div class="features-grid">
+                    <div class="feature-card"><span class="feature-icon">🔐</span><h3>OG &amp; Whitelist Phases</h3><p>Reward your earliest supporters with exclusive early access at lower prices, powered by cryptographic Merkle tree allowlists.</p></div>
+                    <div class="feature-card"><span class="feature-icon">🌐</span><h3>Permanent IPFS Storage</h3><p>Your images and metadata are stored on IPFS via NFT.Storage — decentralised, permanent, and censorship-resistant.</p></div>
+                    <div class="feature-card"><span class="feature-icon">⚡</span><h3>No Code Required</h3><p>Upload images, fill the form, click deploy. No terminal, no Rust, no Anchor — just a browser and a Phantom wallet.</p></div>
+                    <div class="feature-card"><span class="feature-icon">💰</span><h3>On-Chain Royalties</h3><p>Set your royalty percentage at deploy time. Every secondary sale on any marketplace pays your wallet automatically.</p></div>
+                    <div class="feature-card"><span class="feature-icon">🎯</span><h3>Free Mint Support</h3><p>Set any phase price to 0 SOL for a free mint. Full control over which phases are free and which are paid.</p></div>
+                    <div class="feature-card"><span class="feature-icon">🔗</span><h3>Shareable Mint Page</h3><p>Every collection gets a dedicated mint page URL your community can bookmark, share on Twitter, and return to mint from.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LAUNCH CTA -->
+        <section id="launch" class="launch-section">
+            <div class="container">
+                <div class="launch-card">
+                    <h2>Ready to Launch?</h2>
+                    <p>Deploy your NFT collection on Solana in under a minute — no code, no servers, no waiting. Free on devnet, ready for mainnet.</p>
+                    <div class="launch-cta-group">
+                        <a href="create.html" class="btn btn-primary">⚒️ Open Creator Studio</a>
+                        <a href="https://github.com/YOUR_USERNAME/throne-of-power" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
+                    </div>
+                    <div class="launch-note">
+                        <span>✅ Free on devnet</span><span>·</span>
+                        <span>✅ No coding required</span><span>·</span>
+                        <span>✅ Real on-chain NFTs</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <span class="footer-logo">Throne Of Power 👑</span>
+                    <p>The no-code Solana NFT launchpad. Deploy collections, manage mint phases, and build your community on-chain.</p>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Platform</h4>
+                    <a href="#collections">Collections</a>
+                    <a href="create.html">Creator Studio</a>
+                    <a href="#how-it-works">How It Works</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Resources</h4>
+                    <a href="https://docs.metaplex.com" target="_blank" rel="noopener">Metaplex Docs</a>
+                    <a href="https://nft.storage"       target="_blank" rel="noopener">NFT.Storage</a>
+                    <a href="https://faucet.solana.com" target="_blank" rel="noopener">Devnet Faucet</a>
+                    <a href="https://phantom.app"       target="_blank" rel="noopener">Get Phantom</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Network</h4>
+                    <a href="https://explorer.solana.com/?cluster=devnet" target="_blank" rel="noopener">Solana Explorer</a>
+                    <a href="https://github.com/YOUR_USERNAME/throne-of-power" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Throne Of Power. All Rights Reserved.</p>
+                <p class="footer-network-badge" id="footer-network-badge">🔵 Devnet</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="wallet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+/* ── Mint page layout ─────────────────────────────────────── */
+.mint-page { min-height: 100vh; display: flex; flex-direction: column; }
+.mint-hero  {
+  padding: 120px 0 60px;
+  background: radial-gradient(circle at 50% 0%, rgba(212,175,55,.08) 0%, transparent 70%);
+}
+
+.mint-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+@media(max-width:860px){ .mint-grid { grid-template-columns: 1fr; } }
+
+/* ── NFT image card ──────────────────────────────────────── */
+.nft-image-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+  position: sticky;
+  top: 100px;
+}
+.nft-image-card img { width: 100%; display: block; aspect-ratio: 1; object-fit: cover; }
+.nft-image-placeholder {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  background: rgba(212,175,55,.05);
+}
+.nft-image-card .card-info { padding: 1.25rem 1.5rem; }
+.nft-image-card .card-info h3 { font-family: 'Cinzel',serif; font-size: 1.4rem; margin-bottom: .25rem; }
+.nft-image-card .card-info p  { color: var(--secondary-text); font-size: .9rem; }
+
+/* ── Mint panel ──────────────────────────────────────────── */
+.mint-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.mint-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.mint-stat {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+.mint-stat .stat-val { font-size: 1.6rem; font-weight: 700; color: var(--primary-gold); display: block; }
+.mint-stat .stat-lbl { font-size: .75rem; color: var(--secondary-text); margin-top: .2rem; }
+
+/* Progress bar */
+.mint-progress-wrap { margin-top: .5rem; }
+.mint-progress-track { height: 8px; background: rgba(212,175,55,.15); border-radius: 4px; overflow: hidden; }
+.mint-progress-fill  { height: 100%; background: var(--primary-gold); border-radius: 4px; transition: width .5s ease; }
+.mint-progress-label { display: flex; justify-content: space-between; font-size: .78rem; color: var(--secondary-text); margin-top: .3rem; }
+
+/* ── Phase tabs ──────────────────────────────────────────── */
+.phases-nav {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.phase-tab {
+  padding: .45rem 1rem;
+  border-radius: 50px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--secondary-text);
+  font-size: .82rem;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'Poppins', sans-serif;
+}
+.phase-tab.active  { background: var(--primary-gold); border-color: var(--primary-gold); color: #100f15; font-weight: 600; }
+.phase-tab.ended   { opacity: .4; text-decoration: line-through; cursor: default; }
+.phase-tab.upcoming{ border-style: dashed; }
+.phase-badge-dot   { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: .3rem; }
+.dot-active  { background: #2ecc71; }
+.dot-upcoming{ background: var(--primary-gold); }
+.dot-ended   { background: var(--secondary-text); }
+
+/* ── Active phase card ───────────────────────────────────── */
+.active-phase-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+.active-phase-card .phase-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: var(--primary-gold);
+  margin-bottom: 1rem;
+}
+.phase-detail-row { display: flex; justify-content: space-between; align-items: center; padding: .4rem 0; border-bottom: 1px solid var(--border-color); }
+.phase-detail-row:last-child { border-bottom: none; }
+.phase-detail-row .label { color: var(--secondary-text); font-size: .85rem; }
+.phase-detail-row .value { font-weight: 600; font-size: .95rem; }
+
+/* ── Countdown ───────────────────────────────────────────── */
+.countdown-wrap { text-align: center; padding: .75rem 0; }
+.countdown-wrap .countdown-label { font-size: .78rem; color: var(--secondary-text); margin-bottom: .4rem; }
+.countdown-digits {
+  display: flex;
+  justify-content: center;
+  gap: .75rem;
+  font-family: 'Cinzel', serif;
+}
+.countdown-unit span.num { font-size: 1.8rem; color: var(--primary-gold); font-weight: 700; }
+.countdown-unit span.lbl { font-size: .65rem; color: var(--secondary-text); display: block; text-align: center; }
+
+/* ── Eligibility banner ──────────────────────────────────── */
+.eligibility-banner {
+  padding: .7rem 1rem;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  text-align: center;
+}
+.eligibility-banner.allowed  { background: rgba(46,204,113,.12); border: 1px solid rgba(46,204,113,.3); color: #2ecc71; }
+.eligibility-banner.denied   { background: rgba(231,76,60,.08);  border: 1px solid rgba(231,76,60,.25); color: #e74c3c; }
+.eligibility-banner.unknown  { background: rgba(212,175,55,.08); border: 1px solid var(--border-color); color: var(--secondary-text); }
+
+/* ── Mint button ─────────────────────────────────────────── */
+.btn-mint {
+  width: 100%;
+  padding: 1.1rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary-gold), #e7c356);
+  color: #100f15;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  transition: transform .2s, opacity .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+}
+.btn-mint:hover:not(:disabled) { transform: translateY(-2px); }
+.btn-mint:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-mint .mint-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(16,15,21,.3);
+  border-top-color: #100f15;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Mint result card ────────────────────────────────────── */
+.mint-result-card {
+  background: rgba(46,204,113,.07);
+  border: 1px solid rgba(46,204,113,.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+.mint-result-card .result-icon { font-size: 2.5rem; margin-bottom: .5rem; }
+.mint-result-card h3 { font-family: 'Cinzel', serif; margin-bottom: .5rem; }
+.mint-result-card code { font-size: .75rem; word-break: break-all; opacity: .7; display: block; margin: .5rem 0; }
+.mint-result-card a { color: var(--primary-gold); text-decoration: none; font-size: .85rem; }
+
+/* ── Loading skeleton ────────────────────────────────────── */
+.skeleton { background: linear-gradient(90deg, var(--card-bg) 25%, rgba(255,255,255,.04) 50%, var(--card-bg) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ── Error state ─────────────────────────────────────────── */
+.mint-error { text-align: center; padding: 4rem 2rem; color: var(--secondary-text); }
+.mint-error .error-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+/* ── Wallet connect prompt ───────────────────────────────── */
+.connect-prompt {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+}
+.connect-prompt p { color: var(--secondary-text); margin-bottom: 1rem; font-size: .9rem; }
+
+/* ── Sold out ────────────────────────────────────────────── */
+.sold-out-badge {
+  background: rgba(231,76,60,.1);
+  border: 1px solid rgba(231,76,60,.3);
+  color: #e74c3c;
+  border-radius: 50px;
+  padding: .4rem 1.2rem;
+  font-size: .85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* ── Powered-by footer ───────────────────────────────────── */
+.mint-powered-by {
+  text-align: center;
+  padding: .5rem;
+  font-size: .75rem;
+  color: var(--secondary-text);
+  opacity: .5;
+}
+.mint-powered-by a { color: inherit; }

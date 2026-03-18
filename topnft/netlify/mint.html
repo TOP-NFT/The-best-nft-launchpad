@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Mint — Throne Of Power</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mint-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="mint-page">
+
+    <div id="cursor"></div>
+
+    <!-- Wallet status banner (reused from main site) -->
+    <div id="wallet-status-banner" class="wallet-banner hidden"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">Throne Of Power 👑</a>
+            <ul class="nav-links">
+                <li><a href="index.html#collections">Collections</a></li>
+                <li><a href="create.html">Create</a></li>
+                <li>
+                    <button class="btn btn-secondary" id="connect-wallet-btn" style="cursor:pointer;border:none;font-family:inherit">
+                        <span id="btn-text">Connect Wallet</span>
+                        <span id="btn-spinner" class="spinner hidden"></span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="mint-hero">
+        <div class="container">
+
+            <!-- Error state (shown if CM not found) -->
+            <div id="mint-error" class="mint-error hidden">
+                <div class="error-icon">⚠️</div>
+                <h2>Collection Not Found</h2>
+                <p id="mint-error-msg">Could not load this collection. Check the URL and try again.</p>
+                <a href="index.html" class="btn btn-secondary" style="margin-top:1.5rem">← Back to Home</a>
+            </div>
+
+            <!-- Loading state -->
+            <div id="mint-loading" class="mint-grid">
+                <div class="nft-image-card">
+                    <div class="nft-image-placeholder skeleton" style="height:400px"></div>
+                    <div class="card-info">
+                        <div class="skeleton" style="height:24px;width:60%;margin-bottom:.5rem"></div>
+                        <div class="skeleton" style="height:16px;width:40%"></div>
+                    </div>
+                </div>
+                <div class="mint-panel">
+                    <div class="skeleton" style="height:100px;border-radius:12px"></div>
+                    <div class="skeleton" style="height:80px;border-radius:12px"></div>
+                    <div class="skeleton" style="height:180px;border-radius:12px"></div>
+                    <div class="skeleton" style="height:56px;border-radius:14px"></div>
+                </div>
+            </div>
+
+            <!-- Main mint UI (shown after data loads) -->
+            <div id="mint-main" class="mint-grid hidden">
+
+                <!-- LEFT: NFT Image -->
+                <div class="nft-image-card">
+                    <div id="nft-image-area" class="nft-image-placeholder">🏰</div>
+                    <div class="card-info">
+                        <h3 id="nft-col-name">Loading…</h3>
+                        <p id="nft-col-symbol"></p>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Mint panel -->
+                <div class="mint-panel">
+
+                    <!-- Stats row -->
+                    <div class="mint-stats-row">
+                        <div class="mint-stat">
+                            <span class="stat-val" id="stat-minted">—</span>
+                            <span class="stat-lbl">Minted</span>
+                        </div>
+                        <div class="mint-stat">
+                            <span class="stat-val" id="stat-remaining">—</span>
+                            <span class="stat-lbl">Remaining</span>
+                        </div>
+                        <div class="mint-stat">
+                            <span class="stat-val" id="stat-supply">—</span>
+                            <span class="stat-lbl">Total Supply</span>
+                        </div>
+                    </div>
+
+                    <!-- Mint progress bar -->
+                    <div class="mint-progress-wrap">
+                        <div class="mint-progress-track">
+                            <div class="mint-progress-fill" id="mint-progress-fill" style="width:0%"></div>
+                        </div>
+                        <div class="mint-progress-label">
+                            <span id="progress-pct">0% minted</span>
+                            <span id="stat-sold-out" class="hidden"><span class="sold-out-badge">SOLD OUT</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Phase tabs -->
+                    <div>
+                        <p style="font-size:.8rem;color:var(--secondary-text);margin-bottom:.6rem">Mint Phases</p>
+                        <div class="phases-nav" id="phases-nav"></div>
+                    </div>
+
+                    <!-- Active phase details + countdown -->
+                    <div class="active-phase-card" id="active-phase-card">
+                        <p class="phase-title" id="phase-title">Loading phase…</p>
+                        <div id="phase-details"></div>
+                        <div class="countdown-wrap hidden" id="countdown-wrap">
+                            <p class="countdown-label" id="countdown-label">Phase starts in</p>
+                            <div class="countdown-digits">
+                                <div class="countdown-unit"><span class="num" id="cd-d">00</span><span class="lbl">Days</span></div>
+                                <div class="countdown-unit"><span class="num" id="cd-h">00</span><span class="lbl">Hours</span></div>
+                                <div class="countdown-unit"><span class="num" id="cd-m">00</span><span class="lbl">Mins</span></div>
+                                <div class="countdown-unit"><span class="num" id="cd-s">00</span><span class="lbl">Secs</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Eligibility banner -->
+                    <div class="eligibility-banner unknown" id="eligibility-banner">
+                        Connect your wallet to check eligibility
+                    </div>
+
+                    <!-- Wallet connect prompt (when not connected) -->
+                    <div class="connect-prompt" id="connect-prompt">
+                        <p>Connect your Phantom wallet to mint from this collection</p>
+                        <button class="btn btn-primary" id="mint-connect-btn" style="border:none;cursor:pointer;font-family:inherit">
+                            Connect Wallet
+                        </button>
+                    </div>
+
+                    <!-- Mint button (when connected) -->
+                    <button class="btn-mint hidden" id="btn-mint" disabled>
+                        <span id="mint-btn-text">Mint NFT</span>
+                        <span class="mint-spinner hidden" id="mint-spinner"></span>
+                    </button>
+
+                    <!-- Mint result (shown after successful mint) -->
+                    <div class="mint-result-card hidden" id="mint-result">
+                        <div class="result-icon">👑</div>
+                        <h3>NFT Minted!</h3>
+                        <p>Your NFT is now in your wallet.</p>
+                        <code id="result-mint-addr"></code>
+                        <a id="result-explorer-link" href="#" target="_blank" rel="noopener">View on Solana Explorer ↗</a>
+                        <div style="margin-top:1rem">
+                            <button class="btn btn-secondary" id="mint-another-btn" style="border:none;cursor:pointer;font-family:inherit;font-size:.85rem">
+                                Mint Another
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Powered by -->
+                    <p class="mint-powered-by">Powered by <a href="index.html">Throne Of Power</a></p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Throne Of Power. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="wallet.js"></script>
+    <script src="mint-handler.js"></script>
+    <script src="mint-script.js"></script>
+</body>
+</html>
